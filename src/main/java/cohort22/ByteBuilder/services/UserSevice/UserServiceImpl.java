@@ -5,6 +5,7 @@ import cohort22.ByteBuilder.data.repository.UserRepository;
 import cohort22.ByteBuilder.dto.request.RegisterRequest;
 import cohort22.ByteBuilder.dto.response.UserResponse;
 import cohort22.ByteBuilder.exception.UserException;
+import cohort22.ByteBuilder.mapper.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -22,23 +23,9 @@ public class UserServiceImpl implements UserService{
         if (userRepository.findById(request.getEmail()).isPresent()) {
             throw new UserException("Email already registered!");
         }
-
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setPassword(request.getPassword());
-        user.setVerificationToken(UUID.randomUUID().toString());
-        user.setTokenExpiryDate(LocalDateTime.now().plusMinutes(30));
-        user.setVerified(false);
-
+        User user = Map.mapToRegisterRequest(request);
         userRepository.save(user);
-        UserResponse userResponse = new UserResponse();
-        userResponse.setEmail(user.getEmail());
-        userResponse.setName(user.getName());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setVerified(user.isVerified());
-        return userResponse;
+        return Map.mapTopRegisterResponse(user);
     }
 
     @Override
@@ -53,23 +40,13 @@ public class UserServiceImpl implements UserService{
         user.setVerificationToken(null);
         userRepository.save(user);
 
-        UserResponse userResponse = new UserResponse();
-        userResponse.setEmail(user.getEmail());
-        userResponse.setName(user.getName());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setVerified(user.isVerified());
-        return userResponse;
+        return Map.mapTopRegisterResponse(user);
     }
 
     @Override
     public UserResponse getUserDetails(String email) {
         User user = userRepository.findById(email)
                 .orElseThrow(() -> new UserException("User not found!"));
-        UserResponse userResponse = new UserResponse();
-        userResponse.setEmail(user.getEmail());
-        userResponse.setName(user.getName());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setVerified(user.isVerified());
-        return userResponse;
+        return Map.mapTopRegisterResponse(user);
     }
 }
