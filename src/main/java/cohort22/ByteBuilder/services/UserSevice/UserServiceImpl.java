@@ -4,6 +4,7 @@ import cohort22.ByteBuilder.data.model.User;
 import cohort22.ByteBuilder.data.repository.UserRepository;
 import cohort22.ByteBuilder.dto.request.RegisterRequest;
 import cohort22.ByteBuilder.dto.response.UserResponse;
+import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
 import cohort22.ByteBuilder.exception.UserException;
 import cohort22.ByteBuilder.mapper.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponse registerUser(RegisterRequest request) {
         if (userRepository.findById(request.getEmail()).isPresent()) {
-            throw new UserException("Email already registered!");
+            throw new UserAlreadyExistsException("Email already registered!");
         }
         User user = Map.mapToRegisterRequest(request);
         userRepository.save(user);
