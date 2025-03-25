@@ -8,16 +8,20 @@ import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
 import cohort22.ByteBuilder.exception.UserException;
 import cohort22.ByteBuilder.mapper.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 @Service
 public class UserServiceImpl implements UserService{
+
     @Autowired
     private UserRepository userRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public UserResponse registerUser(RegisterRequest request) {
@@ -25,7 +29,9 @@ public class UserServiceImpl implements UserService{
             throw new UserAlreadyExistsException("Email already registered!");
         }
         User user = Map.mapToRegisterRequest(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
+
         return Map.mapTopRegisterResponse(user);
     }
 

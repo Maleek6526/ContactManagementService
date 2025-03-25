@@ -3,7 +3,6 @@ package cohort22.ByteBuilder.mapper;
 import cohort22.ByteBuilder.data.model.User;
 import cohort22.ByteBuilder.dto.request.RegisterRequest;
 import cohort22.ByteBuilder.dto.response.UserResponse;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
