@@ -18,7 +18,7 @@ public class User {
     private String name;
     private String phoneNumber;
     private String password;
-    private boolean isVerified;
+    private boolean isVerified = false;
     private String verificationToken;
     private LocalDateTime tokenExpiryDate;
 

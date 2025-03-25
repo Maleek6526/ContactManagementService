@@ -1,8 +1,11 @@
 package cohort22.ByteBuilder.controller;
 
+import cohort22.ByteBuilder.dto.request.LoginRequest;
 import cohort22.ByteBuilder.dto.request.RegisterRequest;
+import cohort22.ByteBuilder.dto.response.LoginResponse;
 import cohort22.ByteBuilder.dto.response.UserResponse;
 import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
+import cohort22.ByteBuilder.exception.UserNotFoundException;
 import cohort22.ByteBuilder.services.UserSevice.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -40,4 +45,17 @@ public class UserController {
     public UserResponse getUserDetails(@PathVariable("email") String email) {
         return userService.getUserDetails(email);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        try {
+            LoginResponse response = userService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (UserNotFoundException | IllegalStateException | IllegalArgumentException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
 }
