@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -21,5 +23,7 @@ public class User {
     private boolean isVerified = false;
     private String verificationToken;
     private LocalDateTime tokenExpiryDate;
+    private Set<Contact> contacts = new HashSet<>();
+    private Set<String> blockedNumbers = new HashSet<>();
 
 }

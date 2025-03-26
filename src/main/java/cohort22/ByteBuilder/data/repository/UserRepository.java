@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByVerificationToken(String token);
     Optional<User> findByEmail(String email);
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

@@ -1,9 +1,11 @@
 package cohort22.ByteBuilder.controller;
 
+import cohort22.ByteBuilder.dto.request.AddContactRequest;
 import cohort22.ByteBuilder.dto.request.LoginRequest;
 import cohort22.ByteBuilder.dto.request.RegisterRequest;
 import cohort22.ByteBuilder.dto.response.LoginResponse;
 import cohort22.ByteBuilder.dto.response.UserResponse;
+import cohort22.ByteBuilder.exception.DuplicateContactException;
 import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
 import cohort22.ByteBuilder.exception.UserNotFoundException;
 import cohort22.ByteBuilder.services.UserSevice.UserService;
@@ -58,4 +60,17 @@ public class UserController {
         }
     }
 
+    @PostMapping("/add-contact")
+    public ResponseEntity<String> addContact(@RequestBody AddContactRequest request) {
+        try {
+            userService.addContact(request);
+            return ResponseEntity.ok("Contact added successfully.");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+        }catch (DuplicateContactException e) {
+            return ResponseEntity.badRequest().body("A contact with this phone number already exists!");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An error occurred while adding the contact.");
+        }
+    }
 }

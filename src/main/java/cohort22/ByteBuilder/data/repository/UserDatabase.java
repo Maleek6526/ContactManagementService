@@ -8,4 +8,5 @@ public interface UserDatabase {
     Optional<User> findByEmail(String email);
     Optional<User> findByVerificationToken(String token);
     void save(User user);
+
 }
