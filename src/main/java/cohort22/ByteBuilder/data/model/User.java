@@ -25,5 +25,4 @@ public class User {
     private LocalDateTime tokenExpiryDate;
     private Set<Contact> contacts = new HashSet<>();
     private Set<String> blockedNumbers = new HashSet<>();
-
 }
