@@ -85,6 +85,7 @@ public class UserServiceImpl implements UserService{
 
         LoginResponse response = new LoginResponse();
         response.setMessage("Login successful!");
+        response.setUserId(user.getEmail());
         return response;
     }
 
