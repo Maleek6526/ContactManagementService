@@ -7,6 +7,7 @@ import cohort22.ByteBuilder.data.repository.ContactRepository;
 import cohort22.ByteBuilder.data.repository.SpamReportRepository;
 import cohort22.ByteBuilder.data.repository.UserRepository;
 import cohort22.ByteBuilder.dto.request.*;
+import cohort22.ByteBuilder.dto.response.AddContactResponse;
 import cohort22.ByteBuilder.dto.response.BlockedNumbersResponseDTO;
 import cohort22.ByteBuilder.dto.response.LoginResponse;
 import cohort22.ByteBuilder.dto.response.UserResponse;
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void addContact(AddContactRequest request) {
+    public AddContactResponse addContact(AddContactRequest request) {
         User user = userRepository.findById(request.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -101,15 +102,15 @@ public class UserServiceImpl implements UserService{
             throw new DuplicateContactException("A contact with this phone number already exists!");
         }
 
-        Contact contact = new Contact();
-        contact.setName(request.getName());
-        contact.setEmail(request.getEmail());
-        contact.setPhoneNumber(request.getPhoneNumber());
-        contact.setAddedBy(user.getEmail());
+        Contact contact = Map.mapToAddContactrequest(request);
 
         contactRepository.save(contact);
+
         user.getContacts().add(contact);
+
         userRepository.save(user);
+
+        return Map.mapToAddContactresponse(contact);
     }
 
     @Override
