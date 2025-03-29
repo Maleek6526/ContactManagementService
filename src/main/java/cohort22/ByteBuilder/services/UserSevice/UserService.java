@@ -1,10 +1,10 @@
 package cohort22.ByteBuilder.services.UserSevice;
 
+import cohort22.ByteBuilder.data.model.Contact;
 import cohort22.ByteBuilder.dto.request.*;
-import cohort22.ByteBuilder.dto.response.AddContactResponse;
-import cohort22.ByteBuilder.dto.response.BlockedNumbersResponseDTO;
-import cohort22.ByteBuilder.dto.response.LoginResponse;
-import cohort22.ByteBuilder.dto.response.UserResponse;
+import cohort22.ByteBuilder.dto.response.*;
+
+import java.util.List;
 
 public interface UserService {
     UserResponse registerUser(RegisterRequest request);
@@ -17,5 +17,8 @@ public interface UserService {
     BlockedNumbersResponseDTO getUserBlockedNumbers(String userEmail);
     void reportSpam(ReportSpamRequest request);
     boolean isNumberSpam(String phoneNumber);
+    List<Contact> viewAllSavedContacts(String userEmail);
+    DeleteContactResponse deleteContact(DeleteContactRequest request);
+    UpdateContactResponse updateContact(UpdateContactRequest request);
 
 }

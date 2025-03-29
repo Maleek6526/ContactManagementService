@@ -1,13 +1,10 @@
 package cohort22.ByteBuilder.controller;
 
-import cohort22.ByteBuilder.dto.request.AddContactRequest;
-import cohort22.ByteBuilder.dto.request.LoginRequest;
-import cohort22.ByteBuilder.dto.request.RegisterRequest;
-import cohort22.ByteBuilder.dto.response.AddContactResponse;
-import cohort22.ByteBuilder.dto.response.LoginResponse;
-import cohort22.ByteBuilder.dto.response.UserResponse;
+import cohort22.ByteBuilder.dto.request.*;
+import cohort22.ByteBuilder.dto.response.*;
 import cohort22.ByteBuilder.exception.DuplicateContactException;
 import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
+import cohort22.ByteBuilder.exception.UserException;
 import cohort22.ByteBuilder.exception.UserNotFoundException;
 import cohort22.ByteBuilder.services.UserSevice.UserService;
 import jakarta.validation.Valid;
@@ -72,6 +69,41 @@ public class UserController {
             return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateContact(@RequestBody UpdateContactRequest request) {
+        try {
+            UpdateContactResponse response = userService.updateContact(request);
+            return ResponseEntity.ok(response);
+        } catch (UserNotFoundException | UserException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteContact(@RequestBody DeleteContactRequest request) {
+        try {
+            DeleteContactResponse response = userService.deleteContact(request);
+            return ResponseEntity.ok(response);
+        } catch (UserNotFoundException | UserException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
+        }
+    }
+
+    @GetMapping("/view/{email}")
+    public ResponseEntity<?> viewAllContacts(@PathVariable ("email") String email) {
+        try {
+            return ResponseEntity.ok(userService.viewAllSavedContacts(email));
+        } catch (UserNotFoundException | UserException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
         }
     }
 }

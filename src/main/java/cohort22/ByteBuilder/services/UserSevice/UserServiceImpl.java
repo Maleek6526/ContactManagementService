@@ -7,10 +7,7 @@ import cohort22.ByteBuilder.data.repository.ContactRepository;
 import cohort22.ByteBuilder.data.repository.SpamReportRepository;
 import cohort22.ByteBuilder.data.repository.UserRepository;
 import cohort22.ByteBuilder.dto.request.*;
-import cohort22.ByteBuilder.dto.response.AddContactResponse;
-import cohort22.ByteBuilder.dto.response.BlockedNumbersResponseDTO;
-import cohort22.ByteBuilder.dto.response.LoginResponse;
-import cohort22.ByteBuilder.dto.response.UserResponse;
+import cohort22.ByteBuilder.dto.response.*;
 import cohort22.ByteBuilder.exception.DuplicateContactException;
 import cohort22.ByteBuilder.exception.UserAlreadyExistsException;
 import cohort22.ByteBuilder.exception.UserException;
@@ -19,6 +16,9 @@ import cohort22.ByteBuilder.mapper.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import java.time.LocalDateTime;
@@ -189,6 +189,72 @@ public class UserServiceImpl implements UserService{
         Optional<SpamReport> spamReport = spamReportRepository.findByPhoneNumber(phoneNumber);
 
         return spamReport.map(report -> report.getReportCount() >= 5).orElse(false);
+    }
+
+
+    @Override
+    public List<Contact> viewAllSavedContacts(String userEmail) {
+        User user = userRepository.findById(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        List<Contact> contacts = new ArrayList<>(user.getContacts());
+
+        if (contacts.isEmpty()) {
+            throw new UserException("No contacts found for this user.");
+        }
+
+        return contacts;
+    }
+
+    @Override
+    public DeleteContactResponse deleteContact(DeleteContactRequest request) {
+        User user = userRepository.findById(request.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        Contact contactToDelete = user.getContacts().stream()
+                .filter(contact -> contact.getPhoneNumber().equals(request.getPhoneNumber()))
+                .findFirst()
+                .orElseThrow(() -> new UserException("Contact not found!"));
+
+        user.getContacts().remove(contactToDelete);
+        contactRepository.delete(contactToDelete);
+
+        userRepository.save(user);
+
+        return new DeleteContactResponse("Contact deleted successfully!", new ArrayList<>(user.getContacts()));
+    }
+
+    @Override
+    public UpdateContactResponse updateContact(UpdateContactRequest request) {
+        User user = userRepository.findById(request.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        Contact contactToUpdate = user.getContacts().stream()
+                .filter(contact -> contact.getPhoneNumber().equals(request.getOldPhoneNumber()))
+                .findFirst()
+                .orElseThrow(() -> new UserException("Contact not found!"));
+
+        if (request.getNewPhoneNumber() != null &&
+                user.getContacts().stream().anyMatch(contact -> contact.getPhoneNumber().equals(request.getNewPhoneNumber())
+                        && !contact.equals(contactToUpdate))) {
+            throw new UserException("A contact with this phone number already exists!");
+        }
+
+        if (request.getNewName() != null && !request.getNewName().isEmpty()) {
+            contactToUpdate.setName(request.getNewName());
+        }
+        if (request.getNewPhoneNumber() != null && !request.getNewPhoneNumber().isEmpty()) {
+            contactToUpdate.setPhoneNumber(request.getNewPhoneNumber());
+        }
+        if (request.getNewEmail() != null && !request.getNewEmail().isEmpty()) {
+            contactToUpdate.setEmail(request.getNewEmail());
+        }
+
+        contactRepository.save(contactToUpdate);
+
+        userRepository.save(user);
+
+        return new UpdateContactResponse("Contact updated successfully!", new ArrayList<>(user.getContacts()));
     }
 
 }
