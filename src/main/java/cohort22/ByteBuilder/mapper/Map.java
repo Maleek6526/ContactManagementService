@@ -36,7 +36,6 @@ public class Map {
         contact.setName(request.getName());
         contact.setEmail(request.getEmail());
         contact.setPhoneNumber(request.getPhoneNumber());
-        contact.setAddedBy(request.getEmail());
         return contact;
     }
 
@@ -45,7 +44,6 @@ public class Map {
         response.setName(contact.getName());
         response.setEmail(contact.getEmail());
         response.setPhoneNumber(contact.getPhoneNumber());
-        response.setAddedBy(contact.getAddedBy());
         response.setSpam(contact.isSpam());
         return response;
     }

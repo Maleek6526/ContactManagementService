@@ -103,6 +103,7 @@ public class UserServiceImpl implements UserService{
         }
 
         Contact contact = Map.mapToAddContactrequest(request);
+        contact.setAddedBy(user.getEmail());
 
         contactRepository.save(contact);
 
@@ -110,7 +111,11 @@ public class UserServiceImpl implements UserService{
 
         userRepository.save(user);
 
-        return Map.mapToAddContactresponse(contact);
+        AddContactResponse response = Map.mapToAddContactresponse(contact);
+
+        response.setAddedBy(user.getEmail());
+
+        return response;
     }
 
     @Override
