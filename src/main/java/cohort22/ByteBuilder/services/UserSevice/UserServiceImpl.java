@@ -221,13 +221,14 @@ public class UserServiceImpl implements UserService{
                 .findFirst()
                 .orElseThrow(() -> new UserException("Contact not found!"));
 
+//        contactRepository.delete(contactToDelete);
         user.getContacts().remove(contactToDelete);
-        contactRepository.delete(contactToDelete);
 
         userRepository.save(user);
 
         return new DeleteContactResponse("Contact deleted successfully!", new ArrayList<>(user.getContacts()));
     }
+
 
     @Override
     public UpdateContactResponse updateContact(UpdateContactRequest request) {
@@ -261,5 +262,22 @@ public class UserServiceImpl implements UserService{
 
         return new UpdateContactResponse("Contact updated successfully!", new ArrayList<>(user.getContacts()));
     }
+
+    @Override
+    public void deleteAllContacts(String addedBy) {
+        User user = userRepository.findById(addedBy)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        List<Contact> userContacts = new ArrayList<>(user.getContacts());
+
+        if (userContacts.isEmpty()) {
+            throw new UserException("No contacts found for this user.");
+        }
+
+//        contactRepository.deleteAll(userContacts);
+        user.getContacts().clear();
+        userRepository.save(user);
+    }
+
 
 }

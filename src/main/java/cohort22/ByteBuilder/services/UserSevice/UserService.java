@@ -20,5 +20,6 @@ public interface UserService {
     List<Contact> viewAllSavedContacts(String userEmail);
     DeleteContactResponse deleteContact(DeleteContactRequest request);
     UpdateContactResponse updateContact(UpdateContactRequest request);
+    void deleteAllContacts(String addedBy);
 
 }

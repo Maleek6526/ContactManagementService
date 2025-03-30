@@ -84,6 +84,9 @@ public class UserController {
         }
     }
 
+
+
+
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteContact(@RequestBody DeleteContactRequest request) {
         try {
@@ -96,6 +99,12 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/delete-all/{addedBy}")
+    public ResponseEntity<String> deleteAllContacts(@PathVariable("addedBy") String addedBy) {
+        userService.deleteAllContacts(addedBy);
+        return ResponseEntity.ok("All contacts for user " + addedBy + " deleted successfully.");
+    }
+
     @GetMapping("/view/{email}")
     public ResponseEntity<?> viewAllContacts(@PathVariable ("email") String email) {
         try {
@@ -106,4 +115,6 @@ public class UserController {
             return ResponseEntity.status(500).body("An unexpected error occurred.");
         }
     }
+
+
 }
