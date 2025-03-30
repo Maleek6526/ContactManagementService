@@ -216,19 +216,24 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(request.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
 
-        Contact contactToDelete = user.getContacts().stream()
-                .filter(contact -> contact.getPhoneNumber().equals(request.getPhoneNumber()))
-                .findFirst()
-                .orElseThrow(() -> new UserException("Contact not found!"));
+        List<String> contactsToDelete = request.getPhoneNumbers();
 
-//        contactRepository.delete(contactToDelete);
-        user.getContacts().remove(contactToDelete);
+        if (contactsToDelete == null || contactsToDelete.isEmpty()) {
+            throw new UserException("No contacts selected for deletion!");
+        }
+
+        List<Contact> contactsBeforeDeletion = new ArrayList<>(user.getContacts());
+
+        user.getContacts().removeIf(contact -> contactsToDelete.contains(contact.getPhoneNumber()));
+
+        if (contactsBeforeDeletion.size() == user.getContacts().size()) {
+            throw new UserException("No matching contacts found for deletion!");
+        }
 
         userRepository.save(user);
 
-        return new DeleteContactResponse("Contact deleted successfully!", new ArrayList<>(user.getContacts()));
+        return new DeleteContactResponse("Selected contacts deleted successfully!", new ArrayList<>(user.getContacts()));
     }
-
 
     @Override
     public UpdateContactResponse updateContact(UpdateContactRequest request) {

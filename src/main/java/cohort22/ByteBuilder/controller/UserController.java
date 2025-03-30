@@ -86,7 +86,6 @@ public class UserController {
 
 
 
-
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteContact(@RequestBody DeleteContactRequest request) {
         try {
