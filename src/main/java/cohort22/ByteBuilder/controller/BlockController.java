@@ -46,7 +46,7 @@ public class BlockController {
     }
 
     @GetMapping("/list/{userEmail}")
-    public ResponseEntity<?> getBlockedNumbers(@PathVariable String userEmail) {
+    public ResponseEntity<?> getBlockedNumbers(@PathVariable("userEmail") String userEmail) {
         try {
             BlockedNumbersResponseDTO response = userService.getUserBlockedNumbers(userEmail);
             return ResponseEntity.ok(response);
