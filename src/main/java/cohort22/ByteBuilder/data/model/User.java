@@ -24,5 +24,5 @@ public class User {
     private String verificationToken;
     private LocalDateTime tokenExpiryDate;
     private Set<Contact> contacts = new HashSet<>();
-    private Set<String> blockedNumbers = new HashSet<>();
+    private Set<Contact> blockedNumbers = new HashSet<>();
 }

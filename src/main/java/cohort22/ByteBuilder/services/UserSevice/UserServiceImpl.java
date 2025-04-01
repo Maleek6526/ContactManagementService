@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private ContactRepository contactRepository;
+
     @Autowired
     private SpamReportRepository spamReportRepository;
 
@@ -123,35 +124,45 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(request.getUserEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        if (user.getBlockedNumbers().contains(request.getPhoneNumber())) {
-            throw new IllegalStateException("You have already blocked this number.");
+        Contact contactToBlock = user.getContacts().stream()
+                .filter(contact -> contact.getPhoneNumber().equals(request.getPhoneNumber()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Contact not found."));
+
+        if (user.getBlockedNumbers().contains(contactToBlock)) {
+            throw new IllegalStateException("You have already blocked this contact.");
         }
 
-        user.getBlockedNumbers().add(request.getPhoneNumber());
+        user.getBlockedNumbers().add(contactToBlock);
         userRepository.save(user);
     }
+
     @Override
     public void unblockNumber(UnblockNumberRequestDTO request) {
         User user = userRepository.findById(request.getUserEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        if (!user.getBlockedNumbers().contains(request.getPhoneNumber())) {
-            throw new IllegalStateException("You have not blocked this number.");
-        }
+        Contact contactToUnblock = user.getBlockedNumbers().stream()
+                .filter(contact -> contact.getPhoneNumber().equals(request.getPhoneNumber()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("You have not blocked this contact."));
 
-        user.getBlockedNumbers().remove(request.getPhoneNumber());
+        user.getBlockedNumbers().remove(contactToUnblock);
         userRepository.save(user);
     }
+
 
     @Override
     public BlockedNumbersResponseDTO getUserBlockedNumbers(String userEmail) {
         User user = userRepository.findById(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
         BlockedNumbersResponseDTO response = new BlockedNumbersResponseDTO();
-        response.setBlockedNumbers(user.getBlockedNumbers());
+        response.setBlockedContacts(user.getBlockedNumbers());
 
         return response;
     }
+
 
     @Override
     public void reportSpam(ReportSpamRequest request) {
@@ -279,7 +290,6 @@ public class UserServiceImpl implements UserService{
             throw new UserException("No contacts found for this user.");
         }
 
-//        contactRepository.deleteAll(userContacts);
         user.getContacts().clear();
         userRepository.save(user);
     }
