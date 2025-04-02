@@ -166,34 +166,39 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void reportSpam(ReportSpamRequest request) {
-        Optional<SpamReport> existingReport = spamReportRepository.findByPhoneNumber(request.getPhoneNumber());
+        SpamReport spamReport = spamReportRepository.findById(request.getPhoneNumber())
+                .orElseGet(() -> {
+                    SpamReport newSpam = new SpamReport();
+                    newSpam.setPhoneNumber(request.getPhoneNumber());
+                    return newSpam;
+                });
 
-        if (existingReport.isPresent()) {
-            SpamReport spamReport = existingReport.get();
-
-            if (spamReport.getReportedBy().contains(request.getReporterEmail())) {
-                throw new UserException("You have already reported this number as spam.");
-            }
-
-            spamReport.getReportedBy().add(request.getReporterEmail());
-
-            spamReport.setReportCount(spamReport.getReportCount() + 1);
-
-            spamReportRepository.save(spamReport);
-        } else {
-            SpamReport newSpamReport = new SpamReport();
-            newSpamReport.setPhoneNumber(request.getPhoneNumber());
-            newSpamReport.getReportedBy().add(request.getReporterEmail());
-            newSpamReport.setReportCount(1);
-
-            spamReportRepository.save(newSpamReport);
+        // Prevent duplicate reports from the same user
+        if (spamReport.getReportedBy().contains(request.getReporterEmail())) {
+            throw new UserException("You have already reported this number as spam.");
         }
 
-        contactRepository.findByPhoneNumber(request.getPhoneNumber()).ifPresent(contact -> {
-            contact.setSpam(true);
-            contactRepository.save(contact);
-        });
+        // Update report count & save changes
+        spamReport.getReportedBy().add(request.getReporterEmail());
+        spamReport.setReportCount(spamReport.getReportCount() + 1);
+        spamReportRepository.save(spamReport);
+
+        // If report count >= 5, mark as spam for users with this contact
+        if (spamReport.getReportCount() >= 5) {
+            List<User> usersWithContact = userRepository.findByContactsPhoneNumber(request.getPhoneNumber());
+
+            for (User user : usersWithContact) {
+                for (Contact contact : user.getContacts()) {
+                    if (contact.getPhoneNumber().equals(request.getPhoneNumber())) {
+                        contact.setSpam(true);
+                    }
+                }
+                userRepository.save(user); // Save the updated user
+            }
+        }
     }
+
+
 
     @Override
     public boolean isNumberSpam(String phoneNumber) {
@@ -202,9 +207,29 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("Phone number cannot be null or empty.");
         }
 
-        Optional<SpamReport> spamReport = spamReportRepository.findByPhoneNumber(phoneNumber);
+        Optional<SpamReport> spamReport = spamReportRepository.findById(phoneNumber);
 
         return spamReport.map(report -> report.getReportCount() >= 5).orElse(false);
+    }
+
+    @Override
+    public List<SpamContactResponse> getAllSpamContactList() {
+        List<SpamContactResponse> spamContactList = new ArrayList<>();
+
+        // Find all users in the repository
+        List<User> allUsers = userRepository.findAll();
+
+        // Iterate through each user and their contacts to check for spam
+        for (User user : allUsers) {
+            for (Contact contact : user.getContacts()) {
+                if (contact.isSpam()) {
+                    // Add to the spam contact list if contact is marked as spam
+                    spamContactList.add(new SpamContactResponse(contact.getName(), contact.getPhoneNumber(), contact.getEmail()));
+                }
+            }
+        }
+
+        return spamContactList;
     }
 
 

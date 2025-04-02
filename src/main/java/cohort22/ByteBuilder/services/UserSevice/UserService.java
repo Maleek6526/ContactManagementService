@@ -21,5 +21,6 @@ public interface UserService {
     DeleteContactResponse deleteContact(DeleteContactRequest request);
     UpdateContactResponse updateContact(UpdateContactRequest request);
     void deleteAllContacts(String addedBy);
+    List<SpamContactResponse> getAllSpamContactList();
 
 }
