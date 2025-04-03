@@ -172,18 +172,13 @@ public class UserServiceImpl implements UserService{
                     newSpam.setPhoneNumber(request.getPhoneNumber());
                     return newSpam;
                 });
-
-        // Prevent duplicate reports from the same user
         if (spamReport.getReportedBy().contains(request.getReporterEmail())) {
             throw new UserException("You have already reported this number as spam.");
         }
-
-        // Update report count & save changes
         spamReport.getReportedBy().add(request.getReporterEmail());
         spamReport.setReportCount(spamReport.getReportCount() + 1);
         spamReportRepository.save(spamReport);
 
-        // If report count >= 5, mark as spam for users with this contact
         if (spamReport.getReportCount() >= 5) {
             List<User> usersWithContact = userRepository.findByContactsPhoneNumber(request.getPhoneNumber());
 
@@ -193,7 +188,7 @@ public class UserServiceImpl implements UserService{
                         contact.setSpam(true);
                     }
                 }
-                userRepository.save(user); // Save the updated user
+                userRepository.save(user);
             }
         }
     }
@@ -215,15 +210,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<SpamContactResponse> getAllSpamContactList() {
         List<SpamContactResponse> spamContactList = new ArrayList<>();
-
-        // Find all users in the repository
         List<User> allUsers = userRepository.findAll();
 
-        // Iterate through each user and their contacts to check for spam
         for (User user : allUsers) {
             for (Contact contact : user.getContacts()) {
                 if (contact.isSpam()) {
-                    // Add to the spam contact list if contact is marked as spam
                     spamContactList.add(new SpamContactResponse(contact.getName(), contact.getPhoneNumber(), contact.getEmail()));
                 }
             }
