@@ -22,5 +22,8 @@ public interface UserService {
     UpdateContactResponse updateContact(UpdateContactRequest request);
     void deleteAllContacts(String addedBy);
     List<SpamContactResponse> getAllSpamContactList();
+    int countContacts(String userEmail);
+    int countBlockedContacts(String userEmail);
+    int countSpamContact(String userEmail);
 
 }

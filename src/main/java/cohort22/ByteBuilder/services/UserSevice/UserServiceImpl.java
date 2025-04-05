@@ -239,6 +239,25 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public int countContacts(String userEmail) {
+        User user = userRepository.findById(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getContacts().size();
+    }
+
+    @Override
+    public int countBlockedContacts(String userEmail) {
+        User user = userRepository.findById(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getBlockedNumbers().size();
+    }
+
+    @Override
+    public int countSpamContact(String userEmail) {
+        return 0;
+    }
+
+    @Override
     public DeleteContactResponse deleteContact(DeleteContactRequest request) {
         User user = userRepository.findById(request.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));

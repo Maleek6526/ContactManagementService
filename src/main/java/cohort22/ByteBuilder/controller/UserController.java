@@ -115,5 +115,32 @@ public class UserController {
         }
     }
 
+    @GetMapping("/contact/count/{email}")
+    public ResponseEntity<Integer> countUserContacts(@PathVariable("email") String email) {
+        try{
+            int count = userService.countContacts(email);
+            return ResponseEntity.ok(count);
+        }
+        catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+
+
+    }
+
+    @GetMapping("/contact/countBlockedNumbers/{email}")
+    public ResponseEntity<?> countBlockedContacts(@PathVariable("email") String email) {
+        try{
+            int count = userService.countBlockedContacts(email);
+            return ResponseEntity.ok(count);
+        }
+        catch (UserNotFoundException | UserException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
 
 }
