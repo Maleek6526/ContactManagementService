@@ -23,4 +23,4 @@ jobs:
         run: mvn -B clean package -DskipsTests
       - name: Maven Verify
         run: mvn -B clean verify
- 
+
